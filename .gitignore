@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+**/.next/
+out/
+**/out/
+
+# Build output
+dist/
+build/
+coverage/
+**/coverage/
+**/bin/
+**/obj/
+*.tsbuildinfo
+
+# Local environment variables
+.env
+.env.*
+.env.local
+.env.*.local
+
+# Keep safe environment templates
+!.env.example
+!**/.env.example
+
+# Logs
+*.log
+logs/
+**/logs/
+connector/diagnostics/
+connector/**/diagnostics/
+*.diagnostic.json
+*.diagnostic.xml
+tally-response-*.json
+tally-response-*.xml
+
+# Operating system and editors
+.DS_Store
+Thumbs.db
+.Spotlight-V100/
+.Trashes/
+ehthumbs.db
+Desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Connector local configuration and secrets
+connector/**/appsettings.json
+connector/appsettings.Local.json
+connector/**/appsettings.Local.json
+connector/**/appsettings.*.local.json
+connector/**/Properties/launchSettings.json
+connector/logs/
+
+# Vercel local metadata
+.vercel/
+
+# Test and temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+TestResults/
+**/TestResults/

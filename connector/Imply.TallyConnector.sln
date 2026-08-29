@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Imply.TallyConnector", "Imply.TallyConnector\Imply.TallyConnector.csproj", "{CC0A5C39-928C-40ED-B70D-61584F102E8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Imply.TallyConnector.Tests", "Imply.TallyConnector.Tests\Imply.TallyConnector.Tests.csproj", "{A47242AC-655F-4D4B-B892-1292D4B32CF4}"
+EndProject
+Global
+  GlobalSection(SolutionConfigurationPlatforms) = preSolution
+    Debug|Any CPU = Debug|Any CPU
+    Release|Any CPU = Release|Any CPU
+  EndGlobalSection
+  GlobalSection(ProjectConfigurationPlatforms) = postSolution
+    {CC0A5C39-928C-40ED-B70D-61584F102E8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {CC0A5C39-928C-40ED-B70D-61584F102E8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {CC0A5C39-928C-40ED-B70D-61584F102E8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {CC0A5C39-928C-40ED-B70D-61584F102E8B}.Release|Any CPU.Build.0 = Release|Any CPU
+    {A47242AC-655F-4D4B-B892-1292D4B32CF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {A47242AC-655F-4D4B-B892-1292D4B32CF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {A47242AC-655F-4D4B-B892-1292D4B32CF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {A47242AC-655F-4D4B-B892-1292D4B32CF4}.Release|Any CPU.Build.0 = Release|Any CPU
+  EndGlobalSection
+EndGlobal

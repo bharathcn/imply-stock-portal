@@ -1,0 +1,14 @@
+{
+  "name": "imply-stock-portal",
+  "private": true,
+  "workspaces": [
+    "portal"
+  ],
+  "scripts": {
+    "dev": "npm --workspace portal run dev",
+    "build": "npm --workspace portal run build",
+    "lint": "npm --workspace portal run lint",
+    "test": "npm --workspace portal run test",
+    "typecheck": "npm --workspace portal run typecheck"
+  }
+}

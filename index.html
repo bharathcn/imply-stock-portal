@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#17261f" />
+  <title>IMPLY Stock Portal</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">IMPLY</div>
+    <div>
+      <h1>Stock &amp; Price</h1>
+      <p>Sales portal</p>
+    </div>
+    <button class="avatar" aria-label="Account">BC</button>
+  </header>
+
+  <main>
+    <section class="sync-card" aria-live="polite">
+      <span class="status-dot"></span>
+      <div>
+        <strong id="syncStatus">Last known inventory</strong>
+        <p id="syncTime">Synced 20 Aug 2026, 7:02 PM</p>
+      </div>
+    </section>
+
+    <section class="selector-card">
+      <div class="intro">
+        <p class="eyebrow">PRODUCT LOOKUP</p>
+        <h2>Check availability</h2>
+        <p>Select a valid product combination. Out-of-stock products remain available.</p>
+      </div>
+
+      <form id="lookupForm">
+        <label>Brand<select id="brand"></select></label>
+        <label>Product family<select id="family"></select></label>
+        <label>Thickness<select id="thickness"></select></label>
+        <label>Size<select id="size"></select></label>
+        <label>Grade<select id="grade"></select></label>
+        <button type="submit" class="primary">Check stock &amp; price</button>
+      </form>
+    </section>
+
+    <section id="result" class="result-card" hidden aria-live="polite">
+      <div class="result-heading">
+        <div>
+          <p class="eyebrow">SELECTED PRODUCT</p>
+          <h2 id="productTitle"></h2>
+          <p id="tallyName" class="muted"></p>
+        </div>
+        <span id="availabilityBadge" class="badge"></span>
+      </div>
+      <div class="metrics">
+        <article><span>Available stock</span><strong id="quantity"></strong></article>
+        <article><span>Custom selling price</span><strong id="price"></strong></article>
+      </div>
+      <div class="godown">
+        <span>Godown balance</span>
+        <strong id="godown"></strong>
+      </div>
+      <p class="warning">Quantity is based on the last successful TallyPrime sync. Orders not yet entered in Tally may not be reflected.</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
