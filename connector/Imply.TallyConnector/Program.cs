@@ -28,7 +28,11 @@ builder.Services.AddSerilog();
 builder.Services.AddWindowsService(options => options.ServiceName = "IMPLY Tally Connector");
 builder.Services.Configure<ConnectorOptions>(builder.Configuration.GetSection("Connector"));
 builder.Services.AddHttpClient<TallyHttpClient>();
-builder.Services.AddHttpClient<ICloudApiClient, CloudApiClient>();
+builder.Services.AddHttpClient<ICloudApiClient, CloudApiClient>((serviceProvider, client) =>
+{
+    var connectorOptions = serviceProvider.GetRequiredService<IOptions<ConnectorOptions>>().Value;
+    client.Timeout = TimeSpan.FromSeconds(connectorOptions.HttpTimeoutSeconds);
+});
 builder.Services.AddSingleton<ITallyInventoryReader, JsonTallyInventoryReader>();
 builder.Services.AddSingleton<XmlTallyInventoryReader>();
 if (cli.Command == ConnectorCommand.Run)
