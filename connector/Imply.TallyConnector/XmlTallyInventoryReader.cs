@@ -63,7 +63,7 @@ public static class XmlRequests
         <ENVELOPE>
           <HEADER>
             <VERSION>1</VERSION>
-            <TALLYREQUEST>Export Data</TALLYREQUEST>
+            <TALLYREQUEST>Export</TALLYREQUEST>
             <TYPE>Collection</TYPE>
             <ID>IMPLYStockItems</ID>
           </HEADER>

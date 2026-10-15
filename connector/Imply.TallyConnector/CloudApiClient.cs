@@ -19,7 +19,8 @@ public sealed class CloudApiClient(HttpClient httpClient, IOptions<ConnectorOpti
 
     public static readonly JsonSerializerOptions PayloadJsonOptions = new(JsonSerializerDefaults.Web)
     {
-        Converters = { new DecimalStringJsonConverter() }
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Converters = { new DecimalStringJsonConverter(), new UtcDateTimeOffsetJsonConverter() }
     };
 
     public async Task SendSnapshotAsync(InventorySnapshot snapshot, CancellationToken cancellationToken)
@@ -147,6 +148,15 @@ public sealed class ConnectorApiException : HttpRequestException
         or System.Net.HttpStatusCode.BadGateway
         or System.Net.HttpStatusCode.ServiceUnavailable
         or System.Net.HttpStatusCode.GatewayTimeout;
+}
+
+public sealed class UtcDateTimeOffsetJsonConverter : JsonConverter<DateTimeOffset>
+{
+    public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+        reader.GetDateTimeOffset();
+
+    public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options) =>
+        writer.WriteStringValue(value.UtcDateTime.ToString("O", System.Globalization.CultureInfo.InvariantCulture));
 }
 
 public sealed class DecimalStringJsonConverter : JsonConverter<decimal>

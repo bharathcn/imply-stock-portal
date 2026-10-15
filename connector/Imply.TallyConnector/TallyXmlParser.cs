@@ -21,8 +21,9 @@ public static partial class TallyXmlParser
 
         var stockElements = document.Descendants()
             .Where(element =>
-                element.Name.LocalName.Equals("STOCKITEM", StringComparison.OrdinalIgnoreCase) ||
-                element.Name.LocalName.Equals("IMPLYSTOCKITEM", StringComparison.OrdinalIgnoreCase))
+                (element.Name.LocalName.Equals("STOCKITEM", StringComparison.OrdinalIgnoreCase) ||
+                element.Name.LocalName.Equals("IMPLYSTOCKITEM", StringComparison.OrdinalIgnoreCase)) &&
+                !element.Ancestors().Any(a => a.Name.LocalName.Equals("CMPINFO", StringComparison.OrdinalIgnoreCase)))
             .ToList();
         if (stockElements.Count == 0)
         {
@@ -92,15 +93,15 @@ public static partial class TallyXmlParser
     private static bool IsCmpInfoOnlyProcessingResponse(XDocument document)
     {
         var stockItems = document.Descendants().Where(e => e.Name.LocalName.Equals("STOCKITEM", StringComparison.OrdinalIgnoreCase)).ToList();
-        return stockItems.Count > 0 && stockItems.All(e =>
+        return !HasInventoryCollection(document) && stockItems.Count > 0 && stockItems.All(e =>
             e.Ancestors().Any(a => a.Name.LocalName.Equals("CMPINFO", StringComparison.OrdinalIgnoreCase)) &&
             e.Ancestors().Any(a => a.Name.LocalName.Equals("DESC", StringComparison.OrdinalIgnoreCase)));
     }
 
     private static bool HasInventoryCollection(XDocument document) =>
         document.Descendants().Any(e =>
-            e.Name.LocalName.Equals("COLLECTION", StringComparison.OrdinalIgnoreCase) ||
-            e.Name.LocalName.Equals("DATA", StringComparison.OrdinalIgnoreCase));
+            e.Name.LocalName.Equals("COLLECTION", StringComparison.OrdinalIgnoreCase) &&
+            e.Ancestors().Any(a => a.Name.LocalName.Equals("DATA", StringComparison.OrdinalIgnoreCase)));
 
     private static bool HasInventoryRecords(XDocument document) =>
         document.Descendants().Any(e =>

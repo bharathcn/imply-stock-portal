@@ -152,13 +152,31 @@ public sealed class ParserTests
     {
         var request = XmlRequests.StockSummary("Demo & Sons");
 
-        Assert.Contains("<TALLYREQUEST>Export Data</TALLYREQUEST>", request);
+        Assert.Contains("<TALLYREQUEST>Export</TALLYREQUEST>", request);
         Assert.Contains("<TYPE>Collection</TYPE>", request);
         Assert.Contains("<ID>IMPLYStockItems</ID>", request);
         Assert.Contains("<SVCURRENTCOMPANY>Demo &amp; Sons</SVCURRENTCOMPANY>", request);
         Assert.Contains("<TYPE>Stock Item</TYPE>", request);
         Assert.DoesNotContain("Ledger", request);
         Assert.DoesNotContain("Voucher", request);
+    }
+
+    [Fact]
+    public void XmlEmptyExportWithCmpInfoIsEmptyInventoryNotProcessingResponse()
+    {
+        const string xml = "<ENVELOPE><HEADER><STATUS>1</STATUS></HEADER><BODY><DESC><CMPINFO><STOCKITEM>0</STOCKITEM></CMPINFO></DESC><DATA><COLLECTION /></DATA></BODY></ENVELOPE>";
+
+        Assert.Equal("empty_inventory", TallyXmlParser.Inspect(xml).Kind);
+        Assert.Empty(TallyXmlParser.ParseStockItems(xml));
+    }
+
+    [Fact]
+    public void XmlDataWithoutCollectionOrRecordsIsNotValidEmptyInventory()
+    {
+        const string xml = "<ENVELOPE><BODY><DATA /></BODY></ENVELOPE>";
+
+        Assert.Equal("malformed_response", TallyXmlParser.Inspect(xml).Kind);
+        Assert.Throws<TallyExtractionException>(() => TallyXmlParser.ParseStockItems(xml));
     }
 
     [Fact]

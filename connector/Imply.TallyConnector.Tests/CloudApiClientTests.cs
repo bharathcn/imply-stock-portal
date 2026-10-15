@@ -120,6 +120,63 @@ public sealed class CloudApiClientTests
         Assert.Equal(JsonValueKind.String, root.GetProperty("items")[0].GetProperty("godowns")[0].GetProperty("quantity").ValueKind);
     }
 
+    [Fact]
+    public async Task HttpBodiesOmitUnknownOptionalFields()
+    {
+        var handler = new RecordingHandler(
+            new HttpResponseMessage(HttpStatusCode.OK),
+            new HttpResponseMessage(HttpStatusCode.OK));
+        using var httpClient = new HttpClient(handler);
+        var client = CreateClient(httpClient);
+
+        await client.SendSnapshotAsync(CreateSnapshot(), CancellationToken.None);
+        await client.SendHeartbeatAsync(CreateHeartbeat() with { LastSuccessfulSyncAt = null }, CancellationToken.None);
+
+        using var snapshot = JsonDocument.Parse(handler.RequestBodies[0]);
+        Assert.False(snapshot.RootElement.TryGetProperty("tallyRelease", out _));
+        using var heartbeat = JsonDocument.Parse(handler.RequestBodies[1]);
+        Assert.False(heartbeat.RootElement.TryGetProperty("tallyRelease", out _));
+        Assert.False(heartbeat.RootElement.TryGetProperty("lastSuccessfulSyncAt", out _));
+        Assert.Equal("healthy", heartbeat.RootElement.GetProperty("status").GetString());
+    }
+
+    [Fact]
+    public async Task HttpHeartbeatPreservesKnownOptionalFields()
+    {
+        var handler = new RecordingHandler(new HttpResponseMessage(HttpStatusCode.OK));
+        using var httpClient = new HttpClient(handler);
+        var client = CreateClient(httpClient);
+
+        await client.SendHeartbeatAsync(CreateHeartbeat() with { TallyRelease = "7.1" }, CancellationToken.None);
+
+        using var heartbeat = JsonDocument.Parse(handler.RequestBodies.Single());
+        Assert.Equal("7.1", heartbeat.RootElement.GetProperty("tallyRelease").GetString());
+        Assert.Equal(JsonValueKind.String, heartbeat.RootElement.GetProperty("lastSuccessfulSyncAt").ValueKind);
+    }
+
+    [Theory]
+    [InlineData("2026-10-15T14:34:23.1234567+05:30", "2026-10-15T09:04:23.1234567Z")]
+    [InlineData("2026-10-15T09:04:23.1234567+00:00", "2026-10-15T09:04:23.1234567Z")]
+    [InlineData("2026-10-15T05:04:23.1234567-04:00", "2026-10-15T09:04:23.1234567Z")]
+    public async Task FinalHttpTimestampsUseUtcZFormat(string input, string expected)
+    {
+        var handler = new RecordingHandler(
+            new HttpResponseMessage(HttpStatusCode.OK),
+            new HttpResponseMessage(HttpStatusCode.OK));
+        using var httpClient = new HttpClient(handler);
+        var client = CreateClient(httpClient);
+        var instant = DateTimeOffset.Parse(input, System.Globalization.CultureInfo.InvariantCulture);
+
+        await client.SendSnapshotAsync(CreateSnapshot() with { SyncStartedAt = instant, SyncCompletedAt = instant }, CancellationToken.None);
+        await client.SendHeartbeatAsync(CreateHeartbeat() with { LastSuccessfulSyncAt = instant }, CancellationToken.None);
+
+        using var snapshot = JsonDocument.Parse(handler.RequestBodies[0]);
+        Assert.Equal(expected, snapshot.RootElement.GetProperty("syncStartedAt").GetString());
+        Assert.Equal(expected, snapshot.RootElement.GetProperty("syncCompletedAt").GetString());
+        using var heartbeat = JsonDocument.Parse(handler.RequestBodies[1]);
+        Assert.Equal(expected, heartbeat.RootElement.GetProperty("lastSuccessfulSyncAt").GetString());
+    }
+
     private static CloudApiClient CreateClient(HttpClient httpClient) => new(
         httpClient,
         Options.Create(new ConnectorOptions { CloudApiBaseUrl = "https://portal.example.invalid", ConnectorId = "office-main", TallyCompanyName = "Demo" }),
@@ -146,13 +203,15 @@ public sealed class CloudApiClientTests
     {
         private int _index;
         public List<HttpRequestMessage> Requests { get; } = [];
+        public List<string> RequestBodies { get; } = [];
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             Requests.Add(request);
+            RequestBodies.Add(request.Content is null ? "" : await request.Content.ReadAsStringAsync(cancellationToken));
             var response = responses[Math.Min(_index, responses.Length - 1)];
             _index += 1;
-            return Task.FromResult(response);
+            return response;
         }
     }
 

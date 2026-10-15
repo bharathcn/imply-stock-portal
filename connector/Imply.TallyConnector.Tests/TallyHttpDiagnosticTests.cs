@@ -59,7 +59,7 @@ public sealed class TallyHttpDiagnosticTests
         Assert.Contains("Invalid Request Format, Missing tallyrequest", report.JsonError);
         Assert.Equal(2, handler.RequestBodies.Count);
         Assert.Contains("\"tallyrequest\"", handler.RequestBodies[0]);
-        Assert.Contains("<TALLYREQUEST>Export Data</TALLYREQUEST>", handler.RequestBodies[1]);
+        Assert.Contains("<TALLYREQUEST>Export</TALLYREQUEST>", handler.RequestBodies[1]);
         Assert.Contains("<NATIVEMETHOD>Name</NATIVEMETHOD>", handler.RequestBodies[1]);
         Assert.Equal("text/xml; charset=utf-8", handler.ContentTypes[1]);
     }
@@ -85,7 +85,16 @@ public sealed class TallyHttpDiagnosticTests
         var report = await xml.RunDiagnosticAsync(new DiagnosticOptions(SaveResponse: false), CancellationToken.None);
 
         Assert.True(report.Succeeded, report.Error);
-        Assert.Equal("Export Data/Collection/IMPLYStockItems", report.OutgoingRequestKind);
+        Assert.Equal("Export/Collection/IMPLYStockItems", report.OutgoingRequestKind);
+        var sentDocument = System.Xml.Linq.XDocument.Parse(handler.RequestBodies.Single());
+        var header = sentDocument.Root!.Element("HEADER")!;
+        Assert.Equal("1", header.Element("VERSION")!.Value);
+        Assert.Equal("Export", header.Element("TALLYREQUEST")!.Value);
+        Assert.Equal("Collection", header.Element("TYPE")!.Value);
+        var collection = sentDocument.Descendants("COLLECTION").Single();
+        Assert.Equal(header.Element("ID")!.Value, collection.Attribute("NAME")!.Value);
+        Assert.Equal("Stock Item", collection.Element("TYPE")!.Value);
+        Assert.Equal("Demo Company", sentDocument.Descendants("SVCURRENTCOMPANY").Single().Value);
         Assert.Contains("TALLYREQUEST", report.OutgoingRequestElementNames);
         Assert.Contains("NATIVEMETHOD", report.OutgoingRequestElementNames);
         Assert.DoesNotContain("LEDGER", report.OutgoingRequestElementNames);
